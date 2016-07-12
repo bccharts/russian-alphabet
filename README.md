@@ -3,6 +3,11 @@
 Uses [PlotDevice](http://plotdevice.io).
 
 
+### Preview
+
+<img src="http://bencrowder.net/images/languages/RussianAlphabet.png" alt="Russian alphabet chart" />
+
+
 ### Installation
 
 - Download [PyYAML](http://pyyaml.org/wiki/PyYAML) (the zipfile is fine).
