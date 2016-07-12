@@ -1,0 +1,154 @@
+# Russian Alphabet chart
+# by Ben Crowder, bencrowder.net
+# Last modified 12 July 2016
+
+# Uses PlotDevice (plotdevice.io)
+
+import re
+import yaml
+
+# Load the data
+with open("russian-alphabet.yaml", "r") as f:
+    data = yaml.load(f.read())
+
+# Page size and margins (in points)
+PAGE_WIDTH = 792
+PAGE_HEIGHT = 612
+MARGIN = 40
+
+# Row sizes and spacing
+ROW_WIDTH = 175
+ROW_HEIGHT = 107
+LETTERS_PER_ROW = 7
+HORIZONTAL_SPACING = 102
+
+# Font sizes
+LETTER_SIZE = 41
+IPA_SIZE = 14
+NAME_SIZE = 8
+
+# Offsets
+ROW_START_Y = MARGIN + 68
+LINE_Y = 49
+IPA_Y = 25
+NAME_Y = 14
+
+# Colors
+IPA_FILL = "#cb202c" # "#3880c7"
+NAME_FILL = "#444"
+
+# Set up the page
+size(PAGE_WIDTH, PAGE_HEIGHT)
+background(1)
+
+font("Charis SIL", size=11)
+
+def draw_header():
+    """ Draw the header at the top. """
+
+    push()
+
+    font("Charis SIL", size=16, tracking=-15)
+    text(data['label'], MARGIN, MARGIN + 10)
+
+    align(RIGHT)
+    font(size=9, italic=True, tracking=0, sc=False)
+    stroke(0)
+    fill(0.5)
+    text("bencrowder.net — Last modified {}".format(data['updated']), PAGE_WIDTH - MARGIN, MARGIN + 10)
+    font(italic=False)
+    align(LEFT)
+    
+    pop()
+
+def chunks(l, n):
+    """ Yield successive n-sized chunks from l. """
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+
+def draw_row(letters, x, y, i):
+    """ Draw a column of letters. """
+
+    push()
+    translate(x, y)
+
+    if i > 0:
+        # Draw a divider line above the row
+        pen(0.25)
+        stroke(0.5)
+        line(0, -LINE_Y, PAGE_WIDTH - (MARGIN * 2), -LINE_Y)
+
+    for letter in letters:
+        push()
+
+        # The letter itself
+        font("Charis SIL", size=LETTER_SIZE, weight="regular", italic=False, sc=False, tracking=letter['tracking'])
+        fill(0)
+        text(letter['character'], 0, 0)
+
+        # The IPA pronunciation
+        translate(0, IPA_Y)
+        if letter['ipa'] != '':
+            fill("#ccc") # gray for the slashes
+            font(size=IPA_SIZE, tracking=0)
+
+            # This bit is super hacky (adds hairspaces to fix spacing)
+            # without messing up internal tracking
+            hairspace = unichr(int('200a', 16))
+            num_initial_spaces = int(letter['initial_spaces'])
+            num_final_spaces = int(letter['final_spaces'])
+            initial_spaces = (hairspace * num_initial_spaces).encode('utf-8')
+            final_spaces = (hairspace * num_final_spaces).encode('utf-8')
+
+            text(0, 0, xml='/{}<ipa>{}</ipa>{}/'.format(initial_spaces, letter['ipa'].encode('utf-8'), final_spaces))
+
+        # The Russian name
+        translate(0, NAME_Y)
+        fill(NAME_FILL)
+        font(size=NAME_SIZE, tracking=35)
+        text(letter['name'], 0, 0)
+        fill(0)
+
+        pop()
+        translate(HORIZONTAL_SPACING, 0)
+
+    pop()
+
+def parse_list(letters):
+    """ Parses the YAML file into a list of dictionaries. """
+
+    response = []
+
+    for line in letters:
+        data = line.split('|')
+
+        group = {
+            'character': data[0].strip(),
+            'name': data[1].strip(),
+            'ipa': data[2].strip(),
+            'tracking': data[3].strip(),
+            'initial_spaces': data[4].strip(),
+            'final_spaces': data[5].strip(),
+        }
+
+        response.append(group)
+
+    return response
+
+
+
+# Draw the header
+draw_header()
+
+# Chunk the character list into rows
+letter_list = chunks(parse_list(data['letters']), LETTERS_PER_ROW)
+
+# Set up styles
+stylesheet("ipa", fill=IPA_FILL, weight="regular")
+
+# Draw each row
+for i, row in enumerate(letter_list):
+    draw_row(row, MARGIN, ROW_START_Y + (i * ROW_HEIGHT), i)
+
+# Save to PDF (filename specified in the YAML file)
+export(data['output'])
