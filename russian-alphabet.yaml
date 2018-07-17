@@ -1,6 +1,6 @@
 label: Russian Alphabet
 output: 'russian-alphabet.pdf'
-updated: 12 July 2016
+updated: 17 July 2018
 
 letters:
   # letter | name | ipa | letter tracking | IPA # initial hairline spaces | IPA # final hairline spaces
@@ -16,7 +16,7 @@ letters:
   - Ии | и | i | 30 | 2 | 2
   - Йй | и краткое | j | 30 | 2 | 0
   - Кк | ка | k | 30 | 3 | 2
-  - Лл | эл | l | 30 | 3 | 2
+  - Лл | эль | l | 30 | 3 | 2
   - Мм | эм | m | 30 | 0 | 2
   - Нн | эн | n | 30 | 0 | 2
   - Оо | о | o | 30 | 0 | 0
